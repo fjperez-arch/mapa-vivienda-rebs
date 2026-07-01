@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa del déficit de vivienda nueva en España — Pulsímetro Rebs</title>
+</head>
+<body style="margin:0;">
+<style>
+#rmv-root, #rmv-root * { box-sizing: border-box; margin: 0; padding: 0; }
+#rmv-root { font-family: Georgia, 'Times New Roman', serif; background: #ffffff; color: #2b2b28; padding: 32px 0; max-width: 1000px; margin: 0 auto; }
+#rmv-root h1 { font-family: Verdana, Geneva, sans-serif; font-size: 30px; font-weight: 700; line-height: 1.2; color: #003087; margin-bottom: 16px; letter-spacing: -0.3px; }
+#rmv-root .rmv-subtitle { font-family: Georgia, serif; font-size: 15px; color: #5c5750; line-height: 1.65; max-width: 760px; margin-bottom: 28px; }
+#rmv-root .rmv-band { background: #003087; color: #f5f1e8; border-radius: 14px; padding: 26px 30px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; margin-bottom: 24px; border-top: 3px solid #cb5600; }
+#rmv-root .rmv-band-num { font-family: Verdana, Geneva, sans-serif; font-size: 26px; font-weight: 700; line-height: 1.1; }
+#rmv-root .rmv-band-lbl { font-family: Georgia, serif; font-size: 13px; opacity: 0.88; line-height: 1.5; margin-top: 8px; }
+#rmv-root .rmv-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+#rmv-root .rmv-tab { font-family: Verdana, Geneva, sans-serif; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; border: 2px solid #cb5600; color: #003087; background: #fff; }
+#rmv-root .rmv-tab.active { background: #003087; color: #f5f1e8; border-color: #003087; }
+#rmv-root .rmv-map-wrap { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+#rmv-root .rmv-svg-wrap { flex: 2; min-width: 320px; background: #f5f1e8; border: 1px solid #e8e0d0; border-radius: 14px; padding: 14px; }
+#rmv-root svg { width: 100%; height: auto; display: block; }
+#rmv-root .prov { stroke: #f5f1e8; stroke-width: 0.6; cursor: pointer; transition: opacity 0.15s; }
+#rmv-root .prov:hover { opacity: 0.78; stroke-width: 1.6; stroke: #003087; }
+#rmv-root .prov.selected { stroke: #003087; stroke-width: 2; opacity: 1; }
+#rmv-root .rmv-side { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 14px; }
+#rmv-root .rmv-legend, #rmv-root .rmv-info-panel { background: #f5f1e8; border: 1px solid #e8e0d0; border-top: 3px solid #cb5600; border-radius: 14px; padding: 22px 24px; }
+#rmv-root .rmv-legend h3 { font-family: Verdana, Geneva, sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #003087; font-weight: 700; margin-bottom: 16px; }
+#rmv-root .rmv-leg-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+#rmv-root .rmv-leg-item:last-child { margin-bottom: 0; }
+#rmv-root .rmv-leg-swatch { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+#rmv-root .rmv-leg-label { font-family: Georgia, serif; font-size: 13px; color: #5c5750; line-height: 1.5; }
+#rmv-root .rmv-leg-label strong { font-family: Verdana, Geneva, sans-serif; display: block; font-size: 13px; color: #2b2b28; font-weight: 700; margin-bottom: 2px; }
+#rmv-root .rmv-info-panel h4 { font-family: Verdana, Geneva, sans-serif; font-size: 16px; font-weight: 700; color: #2b2b28; margin-bottom: 3px; }
+#rmv-root .rmv-info-ccaa { font-family: Verdana, Geneva, sans-serif; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #9a9284; margin-bottom: 16px; }
+#rmv-root .rmv-info-row { display: flex; flex-direction: column; gap: 3px; padding: 10px 0; border-bottom: 1px solid #e8e0d0; }
+#rmv-root .rmv-info-row:last-child { border-bottom: none; }
+#rmv-root .rmv-info-key { font-family: Georgia, serif; font-size: 12px; color: #5c5750; }
+#rmv-root .rmv-info-val { font-family: Verdana, Geneva, sans-serif; font-size: 14px; font-weight: 700; color: #003087; }
+#rmv-root .rmv-info-placeholder { font-family: Georgia, serif; font-size: 13px; color: #9a9284; font-style: italic; text-align: center; padding: 20px 0; }
+#rmv-root .rmv-footnote { font-family: Georgia, serif; font-size: 10px; color: #8a8478; border-top: 1px solid #e8e0d0; padding-top: 10px; margin-top: 18px; line-height: 1.7; }
+#rmv-root .rmv-footnote strong { color: #cb5600; }
+#rmv-root .rmv-mark { font-family: Verdana, Geneva, sans-serif; font-size: 10px; color: #003087; font-weight: 700; letter-spacing: 1px; text-align: right; margin-top: 5px; }
+#rmv-root .rmv-loading { font-family: Georgia, serif; padding: 60px 0; text-align: center; color: #9a9284; font-size: 12px; }
+</style>
+
+<div id="rmv-root">
+
+<h1>Mapa del déficit de vivienda nueva en España</h1>
+<p class="rmv-subtitle">Presión de la demanda provincia a provincia, según transacciones de vivienda nueva en 2025. Pulsa cualquier provincia para ver sus datos. Fuente: Pulsímetro Rebs / INE / Banco de España.</p>
+
+<div class="rmv-band">
+  <div><div class="rmv-band-num">750.000</div><div class="rmv-band-lbl">viviendas de déficit acumulado 2021-2025 (BdE)</div></div>
+  <div><div class="rmv-band-num">155.668</div><div class="rmv-band-lbl">transacciones de obra nueva en España en 2025</div></div>
+  <div><div class="rmv-band-num">92.000</div><div class="rmv-band-lbl">viviendas terminadas en 2025 vs 240.000 hogares nuevos</div></div>
+  <div><div class="rmv-band-num">290.022 €</div><div class="rmv-band-lbl">precio medio vivienda nueva España 2025</div></div>
+</div>
+
+<div class="rmv-tabs">
+  <button class="rmv-tab active" id="rmv-tab-vol">Volumen demanda</button>
+  <button class="rmv-tab" id="rmv-tab-crec">Crecimiento 24→25</button>
+  <button class="rmv-tab" id="rmv-tab-precio">Precio medio</button>
+</div>
+
+<div class="rmv-map-wrap">
+  <div class="rmv-svg-wrap">
+    <div id="rmv-map"><div class="rmv-loading">Cargando mapa…</div></div>
+  </div>
+  <div class="rmv-side">
+    <div class="rmv-legend" id="rmv-legend"></div>
+    <div class="rmv-info-panel" id="rmv-info-panel"><p class="rmv-info-placeholder">← Pulsa una provincia</p></div>
+  </div>
+</div>
+
+<div class="rmv-footnote">
+  <strong>Fuentes:</strong> Pulsímetro Rebs — Transacciones y Valores Medios Vivienda Nueva, junio 2026 (INE / Ministerio de Transportes y Movilidad Sostenible) ·
+  Banco de España, Informe Anual 2025 · Proyecciones ARIMA: modelo propio Rebs. ·
+  Cartografía: IGN / es-atlas (martgnz) con proyección Mercator. Baleares y Canarias se muestran en recuadros propios, fuera de escala, con sus formas reales.
+</div>
+<div class="rmv-mark">Rebs Real Estate Business School · rebs-edu.com · 2026</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+(function(){
+const root = document.getElementById('rmv-root');
+
+const INE_TO_NAME = {"01":"Álava","02":"Albacete","03":"Alicante","04":"Almería","05":"Ávila","06":"Badajoz","07":"Baleares","08":"Barcelona","09":"Burgos","10":"Cáceres","11":"Cádiz","12":"Castellón","13":"Ciudad Real","14":"Córdoba","15":"La Coruña","16":"Cuenca","17":"Girona","18":"Granada","19":"Guadalajara","20":"Guipúzcoa","21":"Huelva","22":"Huesca","23":"Jaén","24":"León","25":"Lleida","26":"La Rioja","27":"Lugo","28":"Madrid","29":"Málaga","30":"Murcia","31":"Navarra","32":"Orense","33":"Asturias","34":"Palencia","35":"Las Palmas","36":"Pontevedra","37":"Salamanca","38":"Tenerife","39":"Cantabria","40":"Segovia","41":"Sevilla","42":"Soria","43":"Tarragona","44":"Teruel","45":"Toledo","46":"Valencia","47":"Valladolid","48":"Vizcaya","49":"Zamora","50":"Zaragoza"};
+
+const PROV_DATA = {
+"Madrid":{ccaa:"Madrid",t25:17823,a26:16497,crec:7.8,precio:433297,gap:-1326},
+"Barcelona":{ccaa:"Cataluña",t25:14339,a26:19118,crec:17.6,precio:329992,gap:4779},
+"Málaga":{ccaa:"Andalucía",t25:12015,a26:12415,crec:12.0,precio:430197,gap:400},
+"Alicante":{ccaa:"C. Valenciana",t25:10716,a26:10652,crec:5.5,precio:298835,gap:-64},
+"Sevilla":{ccaa:"Andalucía",t25:7182,a26:7580,crec:44.4,precio:222709,gap:398},
+"Valencia":{ccaa:"C. Valenciana",t25:6776,a26:7617,crec:11.4,precio:199994,gap:841},
+"Murcia":{ccaa:"Murcia",t25:6327,a26:5508,crec:34.2,precio:227316,gap:-820},
+"Cádiz":{ccaa:"Andalucía",t25:5266,a26:5627,crec:19.5,precio:281819,gap:361},
+"Almería":{ccaa:"Andalucía",t25:5158,a26:5483,crec:53.6,precio:187626,gap:325},
+"Las Palmas":{ccaa:"Canarias",t25:3871,a26:3780,crec:12.4,precio:216902,gap:-91},
+"Granada":{ccaa:"Andalucía",t25:3862,a26:4358,crec:17.8,precio:170890,gap:496},
+"Tenerife":{ccaa:"Canarias",t25:3701,a26:3230,crec:10.1,precio:340821,gap:-471},
+"Toledo":{ccaa:"C. La Mancha",t25:3361,a26:2768,crec:12.0,precio:119168,gap:-593},
+"Asturias":{ccaa:"Asturias",t25:3226,a26:2834,crec:7.7,precio:229952,gap:-392},
+"La Coruña":{ccaa:"Galicia",t25:3223,a26:4028,crec:19.0,precio:193841,gap:805},
+"Girona":{ccaa:"Cataluña",t25:3147,a26:4353,crec:6.1,precio:346398,gap:1206},
+"Baleares":{ccaa:"Baleares",t25:3003,a26:3390,crec:11.6,precio:595166,gap:387},
+"Vizcaya":{ccaa:"País Vasco",t25:2923,a26:5129,crec:37.4,precio:346367,gap:2206},
+"Zaragoza":{ccaa:"Aragón",t25:2920,a26:3435,crec:27.9,precio:256857,gap:515},
+"Castellón":{ccaa:"C. Valenciana",t25:2743,a26:1910,crec:-1.6,precio:145081,gap:-834},
+"Tarragona":{ccaa:"Cataluña",t25:2595,a26:3267,crec:14.1,precio:240025,gap:672},
+"Pontevedra":{ccaa:"Galicia",t25:2358,a26:1847,crec:22.8,precio:213888,gap:-511},
+"Córdoba":{ccaa:"Andalucía",t25:2333,a26:2481,crec:16.0,precio:176648,gap:148},
+"Navarra":{ccaa:"Navarra",t25:2257,a26:3600,crec:3.2,precio:291806,gap:1343},
+"Valladolid":{ccaa:"C. y León",t25:2133,a26:1200,crec:15.0,precio:310053,gap:-933},
+"Huelva":{ccaa:"Andalucía",t25:2019,a26:1838,crec:14.5,precio:176200,gap:-181},
+"Cantabria":{ccaa:"Cantabria",t25:1959,a26:1460,crec:39.4,precio:262083,gap:-499},
+"Lleida":{ccaa:"Cataluña",t25:1790,a26:3578,crec:14.0,precio:194270,gap:1788},
+"Álava":{ccaa:"País Vasco",t25:1678,a26:2029,crec:45.4,precio:321895,gap:351},
+"Ciudad Real":{ccaa:"C. La Mancha",t25:1441,a26:1610,crec:30.6,precio:105253,gap:168},
+"Guadalajara":{ccaa:"C. La Mancha",t25:1345,a26:1667,crec:-9.1,precio:200362,gap:322},
+"León":{ccaa:"C. y León",t25:1322,a26:1080,crec:26.5,precio:191826,gap:-242},
+"Jaén":{ccaa:"Andalucía",t25:1075,a26:1043,crec:30.9,precio:138777,gap:-32},
+"Badajoz":{ccaa:"Extremadura",t25:998,a26:904,crec:30.1,precio:124840,gap:-94},
+"Albacete":{ccaa:"C. La Mancha",t25:987,a26:1137,crec:32.0,precio:190449,gap:150},
+"Guipúzcoa":{ccaa:"País Vasco",t25:924,a26:910,crec:-36.8,precio:352106,gap:-14},
+"Burgos":{ccaa:"C. y León",t25:882,a26:512,crec:-10.5,precio:202367,gap:-370},
+"Lugo":{ccaa:"Galicia",t25:849,a26:1214,crec:7.2,precio:141565,gap:364},
+"Orense":{ccaa:"Galicia",t25:658,a26:747,crec:40.6,precio:173015,gap:89},
+"Cáceres":{ccaa:"Extremadura",t25:620,a26:534,crec:32.5,precio:126691,gap:-86},
+"Huesca":{ccaa:"Aragón",t25:617,a26:611,crec:18.9,precio:219852,gap:-6},
+"Salamanca":{ccaa:"C. y León",t25:547,a26:545,crec:37.8,precio:177911,gap:-2},
+"Ávila":{ccaa:"C. y León",t25:446,a26:290,crec:-22.0,precio:120809,gap:-156},
+"Segovia":{ccaa:"C. y León",t25:396,a26:385,crec:30.3,precio:171708,gap:-11},
+"Palencia":{ccaa:"C. y León",t25:277,a26:352,crec:3.0,precio:152120,gap:76},
+"Zamora":{ccaa:"C. y León",t25:258,a26:250,crec:45.8,precio:186277,gap:-8},
+"Teruel":{ccaa:"Aragón",t25:216,a26:638,crec:44.0,precio:108516,gap:422},
+"Soria":{ccaa:"C. y León",t25:190,a26:186,crec:-45.2,precio:168938,gap:-4},
+"Cuenca":{ccaa:"C. La Mancha",t25:136,a26:267,crec:-48.1,precio:135429,gap:131},
+"La Rioja":{ccaa:"La Rioja",t25:780,a26:512,crec:-6.0,precio:202674,gap:-268}
+};
+
+const SEMAPHORE = ["#27ae60","#f1c40f","#e67e22","#e74c3c","#c0392b"];
+
+function bucket(mode, d){
+  if(!d) return -1;
+  if(mode==='vol'){
+    if(d.t25>=8000) return 4;
+    if(d.t25>=4000) return 3;
+    if(d.t25>=2000) return 2;
+    if(d.t25>=1000) return 1;
+    return 0;
+  }
+  if(mode==='crec'){
+    if(d.crec>=30) return 4;
+    if(d.crec>=15) return 3;
+    if(d.crec>=5) return 2;
+    if(d.crec>=0) return 1;
+    return 0;
+  }
+  if(mode==='precio'){
+    if(d.precio>=400000) return 4;
+    if(d.precio>=280000) return 3;
+    if(d.precio>=200000) return 2;
+    if(d.precio>=150000) return 1;
+    return 0;
+  }
+}
+
+const LEGENDS = {
+  vol: { title: "Transacciones 2025", items: [["Presión baja","< 1.000 txs",0],["Presión media","1.000 – 2.000",1],["Presión media-alta","2.000 – 4.000",2],["Presión alta","4.000 – 8.000",3],["Presión crítica","> 8.000",4]] },
+  crec: { title: "Crecimiento 2024 → 2025", items: [["Descenso","< 0%",0],["Crecimiento leve","0% a +5%",1],["Crecimiento moderado","+5% a +15%",2],["Aceleración alta","+15% a +30%",3],["Fuerte aceleración","> +30%",4]] },
+  precio: { title: "Precio medio 2025", items: [["Asequible","< 150.000 €",0],["Medio","150.000 – 200.000 €",1],["Medio-alto","200.000 – 280.000 €",2],["Alto","280.000 – 400.000 €",3],["Muy alto","> 400.000 €",4]] }
+};
+
+let paths = null;
+
+function renderLegend(mode){
+  const cfg = LEGENDS[mode];
+  root.querySelector('#rmv-legend').innerHTML = '<h3>' + cfg.title + '</h3>' + cfg.items.map(function(it){
+    return '<div class="rmv-leg-item"><div class="rmv-leg-swatch" style="background:' + SEMAPHORE[it[2]] + '"></div><div class="rmv-leg-label"><strong>' + it[0] + '</strong>' + it[1] + '</div></div>';
+  }).join('');
+}
+
+function showInfo(name){
+  const d = PROV_DATA[name];
+  const panel = root.querySelector('#rmv-info-panel');
+  if(!d){ panel.innerHTML = '<h4>' + (name||'Sin datos') + '</h4><p class="rmv-info-placeholder">No disponible en el Pulsímetro</p>'; return; }
+  const sign = d.crec>=0?'+':'';
+  const gapSign = d.gap>=0?'+':'';
+  const gapColor = d.gap>=0 ? '#c0392b' : '#1a7a4a';
+  const gapLabel = d.gap>=0 ? 'Demanda ↑ más que oferta' : 'Oferta cubre la demanda';
+  panel.innerHTML =
+    '<h4>' + name + '</h4><div class="rmv-info-ccaa">' + d.ccaa + '</div>' +
+    '<div class="rmv-info-row"><span class="rmv-info-key">Transacciones 2025</span><span class="rmv-info-val">' + d.t25.toLocaleString('es-ES') + '</span></div>' +
+    '<div class="rmv-info-row"><span class="rmv-info-key">Proyección ARIMA 2026</span><span class="rmv-info-val">' + Math.round(d.a26).toLocaleString('es-ES') + '</span></div>' +
+    '<div class="rmv-info-row"><span class="rmv-info-key">Gap demanda/oferta</span><span class="rmv-info-val" style="color:' + gapColor + '">' + gapSign + Math.round(d.gap).toLocaleString('es-ES') + ' — ' + gapLabel + '</span></div>' +
+    '<div class="rmv-info-row"><span class="rmv-info-key">Crecimiento 24→25</span><span class="rmv-info-val">' + sign + d.crec + '%</span></div>' +
+    '<div class="rmv-info-row"><span class="rmv-info-key">Precio medio 2025</span><span class="rmv-info-val">' + d.precio.toLocaleString('es-ES') + ' €</span></div>';
+}
+
+function setMode(mode){
+  root.querySelectorAll('.rmv-tab').forEach(function(t){ t.classList.remove('active'); });
+  root.querySelector('#rmv-tab-' + mode).classList.add('active');
+  renderLegend(mode);
+  if(paths){
+    paths.attr('fill', function(d){
+      const code = String(d.id).padStart(2,'0');
+      const name = INE_TO_NAME[code];
+      const b = bucket(mode, PROV_DATA[name]);
+      return b===-1 ? '#e8e6df' : SEMAPHORE[b];
+    });
+  }
+}
+root.querySelector('#rmv-tab-vol').onclick = function(){ setMode('vol'); };
+root.querySelector('#rmv-tab-crec').onclick = function(){ setMode('crec'); };
+root.querySelector('#rmv-tab-precio').onclick = function(){ setMode('precio'); };
+
+renderLegend('vol');
+
+const W = 700, H = 600;
+const mapHost = root.querySelector('#rmv-map');
+
+const diagnosticTimer = setTimeout(function(){
+  if (typeof d3 === 'undefined') {
+    mapHost.innerHTML = '<div class="rmv-loading" style="color:#cb5600">No ha cargado la librería D3.<br>Esto casi siempre significa que tu WordPress está eliminando las etiquetas &lt;script&gt; al guardar (falta el permiso "unfiltered_html" o "hosting features"). Revisa el código fuente de la página publicada (clic derecho → Ver código fuente) y busca si el &lt;script src="...d3.min.js"&gt; sigue ahí.</div>';
+  } else {
+    mapHost.innerHTML = '<div class="rmv-loading" style="color:#cb5600">D3 cargó correctamente, pero los datos geográficos (es-atlas) no llegaron a tiempo.<br>Puede ser un bloqueo de red/CSP hacia jsdelivr o unpkg. Mira la pestaña "Consola" del navegador (F12) para ver el error exacto.</div>';
+  }
+}, 6000);
+
+mapHost.querySelector('.rmv-loading').remove();
+const svg = d3.select(mapHost).append('svg').attr('viewBox', '0 0 ' + W + ' ' + H);
+
+function colorFor(mode, code){
+  const name = INE_TO_NAME[code];
+  const b = bucket(mode, PROV_DATA[name]);
+  return b===-1 ? '#e8e6df' : SEMAPHORE[b];
+}
+
+function loadProvinces(url){
+  return d3.json(url).then(function(es){
+    if(!es || !es.objects || !es.objects.provinces) throw new Error('formato inesperado');
+    return topojson.feature(es, es.objects.provinces).features;
+  });
+}
+
+loadProvinces('https://cdn.jsdelivr.net/npm/es-atlas/es/provinces.json')
+  .catch(function(){ return loadProvinces('https://unpkg.com/es-atlas/es/provinces.json'); })
+  .then(function(features){
+    clearTimeout(diagnosticTimer);
+
+    const mainland = features.filter(function(f){ const c = String(f.id).padStart(2,'0'); return c!=='07' && c!=='35' && c!=='38'; });
+    const baleares = features.filter(function(f){ return String(f.id).padStart(2,'0')==='07'; });
+    const canarias = features.filter(function(f){ const c = String(f.id).padStart(2,'0'); return c==='35' || c==='38'; });
+
+    const mainProj = d3.geoMercator().fitSize([W-40, H-130], { type:'FeatureCollection', features: mainland });
+    const mainPath = d3.geoPath(mainProj);
+
+    paths = svg.append('g').attr('transform','translate(20,15)')
+      .selectAll('path').data(mainland).join('path')
+      .attr('class','prov').attr('d', mainPath)
+      .attr('fill', function(d){ return colorFor('vol', String(d.id).padStart(2,'0')); })
+      .on('click', function(event,d){
+        svg.selectAll('.prov').classed('selected', false);
+        d3.select(this).classed('selected', true);
+        showInfo(INE_TO_NAME[String(d.id).padStart(2,'0')]);
+      });
+
+    function renderInset(feats, x, y, w, h, label){
+      svg.append('rect').attr('x',x).attr('y',y).attr('width',w).attr('height',h)
+        .attr('fill','none').attr('stroke','#ccc').attr('stroke-width',1).attr('rx',4);
+      svg.append('text').attr('x', x+6).attr('y', y-6).attr('font-size',9).attr('fill','#999').text(label);
+      const proj = d3.geoMercator().fitSize([w-16, h-16], { type:'FeatureCollection', features: feats });
+      const p = d3.geoPath(proj);
+      const grp = svg.append('g').attr('transform','translate(' + (x+8) + ',' + (y+8) + ')');
+      return grp.selectAll('path').data(feats).join('path')
+        .attr('class','prov').attr('d', p)
+        .attr('fill', function(d){ return colorFor('vol', String(d.id).padStart(2,'0')); })
+        .on('click', function(event,d){
+          svg.selectAll('.prov').classed('selected', false);
+          d3.select(this).classed('selected', true);
+          showInfo(INE_TO_NAME[String(d.id).padStart(2,'0')]);
+        });
+    }
+
+    const baleSel = renderInset(baleares, W-180, H-110, 160, 90, 'Baleares (fuera de escala)');
+    const canSel = renderInset(canarias, 20, H-110, 220, 90, 'Canarias (fuera de escala)');
+
+    const allNodes = paths.nodes().concat(baleSel.nodes(), canSel.nodes());
+    const allD3 = d3.selectAll(allNodes);
+    paths = { attr: function(name, fn){ allD3.attr(name, fn); return this; } };
+
+  }).catch(function(err){
+    mapHost.innerHTML = '<div class="rmv-loading">No se pudo cargar la cartografía. Comprueba la conexión a internet (jsdelivr / unpkg).</div>';
+  });
+})();
+</script>
+
+</body>
+</html>
